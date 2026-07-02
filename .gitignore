@@ -1,0 +1,5 @@
+__pycache__/
+*.pyc
+.env
+*.csv
+kbo_pitch_*.csv
