@@ -132,15 +132,37 @@ def collect_player_game_ids(player_id: str, max_expand_clicks: int = 50, headles
     return sorted(game_ids)
 
 
-def save_game_ids(player_id: str, game_ids: list[str]):
+def load_game_ids(player_id: str):
     filename = f"player_{player_id}_game_ids.txt"
 
+    try:
+        with open(filename, "r", encoding="utf-8") as f:
+            game_ids = [line.strip() for line in f if line.strip()]
+    except FileNotFoundError:
+        game_ids = []
+
+    return sorted(set(game_ids))
+
+
+def save_game_ids(player_id: str, game_ids: list[str]):
+    """
+    기존 파일을 지우지 않고, 새 gameId만 병합해서 저장한다.
+    """
+    filename = f"player_{player_id}_game_ids.txt"
+
+    existing_game_ids = load_game_ids(player_id)
+
+    merged_game_ids = sorted(set(existing_game_ids) | set(game_ids))
+
     with open(filename, "w", encoding="utf-8") as f:
-        for gid in game_ids:
+        for gid in merged_game_ids:
             f.write(gid + "\n")
 
-    return filename
+    print("기존 gameId 수:", len(existing_game_ids))
+    print("새로 발견한 gameId 수:", len(set(game_ids) - set(existing_game_ids)))
+    print("최종 gameId 수:", len(merged_game_ids))
 
+    return filename
 
 if __name__ == "__main__":
     PLAYER_ID = "77637"
