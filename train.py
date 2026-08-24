@@ -132,7 +132,12 @@ def make_next_pitch_dataset(
         | df["base3"].fillna(0).ne(0)
     ).astype(int)
 
-    df["score_diff"] = df["home_score"] - df["away_score"]
+    # home_or_away=0이면 홈 투수가 초 공격을 막고, 1이면 원정 투수가
+    # 말 공격을 막는다. 어느 경기장이든 양수는 투수 팀의 리드를 뜻한다.
+    pitcher_team_sign = df["home_or_away"].map({0: 1, 1: -1})
+    df["pitcher_score_diff"] = (
+        df["home_score"] - df["away_score"]
+    ) * pitcher_team_sign
 
     for i in range(1, history_n + 1):
         for suffix in ["pitch_type", "pitch_result"]:
@@ -329,7 +334,7 @@ def get_feature_columns(
         "outs",
         "home_score",
         "away_score",
-        "score_diff",
+        "pitcher_score_diff",
         "runners_on_base",
         "is_risp",
         "times_faced_batter",
